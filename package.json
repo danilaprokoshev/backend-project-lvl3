@@ -6,6 +6,9 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
+  "bin": {
+    "page-loader": "bin/page-loader.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/danilaprokoshev/backend-project-lvl3.git"
@@ -26,6 +29,7 @@
     "nock": "^13.2.4"
   },
   "dependencies": {
-    "axios": "^0.26.1"
+    "axios": "^0.26.1",
+    "commander": "^9.1.0"
   }
 }

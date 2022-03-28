@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 const readFixtureFile = (filename) => fs.readFile(getFixturePath(filename), 'utf-8');
 
-// nock.disableNetConnect();
+nock.disableNetConnect();
 
 let tmpDirPath;
 
