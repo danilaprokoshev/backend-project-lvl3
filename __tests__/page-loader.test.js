@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 const readFixtureFile = (filename) => fs.readFile(getFixturePath(filename), 'utf-8');
 
-nock.disableNetConnect();
+// nock.disableNetConnect();
 
 let tmpDirPath;
 
@@ -22,23 +22,27 @@ beforeEach(async () => {
 describe('return correct path', () => {
   const url = 'https://ru.hexlet.io/courses';
   const filename = 'ru-hexlet-io-courses.html';
+
   test('in default directory', async () => {
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
       .reply(200, 'OK');
     const tmpPageDirpath = path.join(tmpDirPath, process.cwd());
+    await fs.mkdir(tmpPageDirpath, { recursive: true });
     const tmpPageFilePath = path.join(tmpPageDirpath, filename);
     const result = await pageLoader(url, tmpPageDirpath);
 
     expect(scope.isDone()).toBe(true);
     expect(result).toBe(tmpPageFilePath);
   });
+
   test('in optional directory', async () => {
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
       .reply(200, 'OK');
     const optionalDirectoryPath = '/var/tmp';
     const tmpPageDirpath = path.join(tmpDirPath, optionalDirectoryPath);
+    await fs.mkdir(tmpPageDirpath, { recursive: true });
     const tmpPageFilePath = path.join(tmpPageDirpath, filename);
     const result = await pageLoader(url, tmpPageDirpath);
 
