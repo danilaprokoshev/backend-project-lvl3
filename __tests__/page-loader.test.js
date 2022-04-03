@@ -70,7 +70,7 @@ describe('specified urls cases', () => {
   });
 });
 
-describe('checks file existence and its content', () => {
+describe('checks files existence and its content', () => {
   // TODO: add describe each for multiple arguments
   const url = 'https://ru.hexlet.io/courses';
   test('in default directory', async () => {
@@ -82,6 +82,24 @@ describe('checks file existence and its content', () => {
     const resultedHtml = await fs.readFile(result, 'utf-8');
 
     expect(scope.isDone()).toBe(true);
+    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+  });
+  test('check downloading images', async () => {
+    const htmlToResponse = await readFixtureFile('mocked-ru-hexlet-io-courses.html');
+    const expectedHtml = await readFixtureFile('changed-ru-hexlet-io-courses.html');
+    const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
+    const scope = nock(/ru\.hexlet\.io/)
+      .get(/courses$/)
+      .reply(200, htmlToResponse);
+
+    const result = await pageLoader(url, tmpDirPath);
+    const resultedHtml = await fs.readFile(result, 'utf-8');
+    const expectedImage = await readFixtureFile('nodejs.png');
+    const downloadedImagePath = path.join(tmpDirPath, 'ru-hexlet-io-courses_files', imageFilename);
+    const resultedImage = await fs.readFile(downloadedImagePath, 'utf-8');
+
+    expect(scope.isDone()).toBe(true);
+    expect(resultedImage.trim()).toBe(expectedImage.trim());
     expect(resultedHtml.trim()).toBe(expectedHtml.trim());
   });
 });

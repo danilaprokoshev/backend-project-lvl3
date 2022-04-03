@@ -1,6 +1,7 @@
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
+import * as cheerio from 'cheerio';
 
 const isEmptyPathname = (pathname) => pathname === '/';
 
@@ -20,6 +21,11 @@ export default (url, directoryPath = process.cwd()) => {
     url,
     responseType: 'text',
   })
-    .then(({ data }) => fs.writeFile(filePath, data))
+    .then(({ data }) => {
+      const $ = cheerio.load(data);
+      const images = $('img');
+      console.log(images.attr('src'));
+      return fs.writeFile(filePath, data);
+  })
     .then(() => filePath);
 };
