@@ -4,6 +4,8 @@ import { createReadStream } from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nock from 'nock';
+import { get } from 'http';
+import exp from 'constants';
 import pageLoader from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -104,5 +106,44 @@ describe('checks files existence and its content', () => {
     expect(scope.isDone()).toBe(true);
     expect(resultedImage.trim()).toBe(expectedImage.trim());
     expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+  });
+  test('check downloading links and scripts', async () => {
+    const htmlToResponse = await readFixtureFile('mocked-links-scripts-ru-hexlet-io-courses.html');
+    const expectedHtml = await readFixtureFile('changed-links-scripts-ru-hexlet-io-courses.html');
+    const expectedCSS = await readFixtureFile('application.css');
+    const CSSFilename = 'ru-hexlet-io-assets-application.css';
+    const expectedRelatedHtml = await readFixtureFile('mocked-links-scripts-ru-hexlet-io-courses.html');
+    const relatedHtmlFilename = 'ru-hexlet-io-courses.html';
+    const expectedJS = await readFixtureFile('runtime.js');
+    const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
+
+    const scope = nock(/ru\.hexlet\.io/)
+      .get(/courses$/)
+      .reply(200, htmlToResponse)
+      .get(/assets\/application.css$/)
+      .replyWithFile(200, getFixturePath('application.css'), {
+        'Cotent-Type': 'text/css',
+      })
+      .get(/courses$/)
+      .reply(200, htmlToResponse)
+      .get(/packs\/js\/runtime.js$/)
+      .replyWithFile(200, getFixturePath('runtime.js'), {
+        'Cotent-Type': 'text/javascript',
+      });
+
+    const result = await pageLoader(url, tmpDirPath);
+    const resultedHtml = await fs.readFile(result, 'utf-8');
+    const downloadedCSSPath = path.join(tmpDirPath, 'ru-hexlet-io-courses_files', CSSFilename);
+    const resultedCSS = await fs.readFile(downloadedCSSPath, 'utf-8');
+    const downloadedRelatedHtmlPath = path.join(tmpDirPath, 'ru-hexlet-io-courses_files', relatedHtmlFilename);
+    const resultedRelatedHtml = await fs.readFile(downloadedRelatedHtmlPath, 'utf-8');
+    const downloadedJSPath = path.join(tmpDirPath, 'ru-hexlet-io-courses_files', JSFilename);
+    const resultedJS = await fs.readFile(downloadedJSPath, 'utf-8');
+
+    expect(scope.isDone()).toBe(true);
+    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+    expect(resultedCSS.trim()).toBe(expectedCSS.trim());
+    expect(resultedRelatedHtml.trim()).toBe(expectedRelatedHtml.trim());
+    expect(resultedJS.trim()).toBe(expectedJS.trim());
   });
 });

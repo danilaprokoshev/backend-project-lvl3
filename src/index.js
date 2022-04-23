@@ -19,6 +19,7 @@ const composeLocalLink = (URLObject, srcLink) => {
   const hrefWithoutProtocol = path.join(host, isEmptyPathname(pathname) ? '' : pathname);
   const filesDirPath = hrefWithoutProtocol
     .replace(/[^\w]/g, '-');
+  // TODO: pass dirname as arg
   const dirName = '_files';
   const fullFilesDirPath = `${filesDirPath}${dirName}`;
   const { dir, name, ext } = path.parse(srcLink);
@@ -57,8 +58,10 @@ export default (url, directoryPath = process.cwd()) => {
       const $ = cheerio.load(sourceData);
 
       const imageLinks = [];
+      // TODO: abstract to func with polimorphism
       $('img').each(function handler() {
         const attrToChange = $(this).attr('src');
+        // TODO: add new URL constr to identify host name (e.g. script has the the same host)
         if (!attrToChange.startsWith('http')) {
           const externalLink = composeLink(URLObject, attrToChange);
           const localLink = composeLocalLink(URLObject, attrToChange);

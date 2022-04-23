@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+  padding: 0;
+  
+  color: var(--dark);
+  font-size: 16px; /** Set single property: font **/
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.6em;
+}
+  
