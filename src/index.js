@@ -6,14 +6,6 @@ import prettier from 'prettier';
 
 const isEmptyPathname = (pathname) => pathname === '/';
 // TODO: import from parser dir
-const composeLink = (URLObject, srcLink) => {
-  const relativeURL = path.parse(srcLink);
-  if (relativeURL.root === '/') {
-    return `${URLObject.origin}${srcLink}`;
-  }
-  return `${URLObject.href}/${srcLink}`;
-};
-// TODO: import from parser dir
 const composeLocalLink = (URLObject, srcLink) => {
   const { host, pathname } = URLObject;
   const hrefWithoutProtocol = path.join(host, isEmptyPathname(pathname) ? '' : pathname);
@@ -23,9 +15,39 @@ const composeLocalLink = (URLObject, srcLink) => {
   const dirName = '_files';
   const fullFilesDirPath = `${filesDirPath}${dirName}`;
   const { dir, name, ext } = path.parse(srcLink);
-  const localFilename = (path.join(host, dir, name)).replace(/[^\w]/g, '-').concat(ext);
+  const localFilename = (path.join(host, dir, name)).replace(/[^\w]/g, '-').concat(ext || '.html');
 
   return path.join(fullFilesDirPath, localFilename);
+};
+
+const getResourcesLinks = (cheerioModel, URLObject) => {
+  const mapping = {
+    img: 'src',
+    script: 'src',
+    link: 'href',
+  };
+
+  const modifiedCheerioModel = cheerioModel;
+  const resourcesLinks = [];
+
+  Object.keys(mapping).forEach((resource) => {
+    modifiedCheerioModel(resource).each(function handler() {
+      const attrToChange = modifiedCheerioModel(this).attr(mapping[resource]);
+      if (!attrToChange) {
+        return;
+      }
+      const baseURL = path.join(URLObject.href, '/');
+      const attrToChangeURL = new URL(attrToChange, baseURL);
+      if (attrToChangeURL.host !== URLObject.host) {
+        return;
+      }
+      // maybe refactor
+      const localLink = composeLocalLink(URLObject, attrToChangeURL.pathname);
+      modifiedCheerioModel(this).attr(mapping[resource], localLink);
+      resourcesLinks.push({ externalLink: attrToChangeURL.href, localLink, type: resource });
+    });
+  });
+  return { modifiedCheerioModel, resourcesLinks };
 };
 
 export default (url, directoryPath = process.cwd()) => {
@@ -56,24 +78,12 @@ export default (url, directoryPath = process.cwd()) => {
     })
     .then(() => {
       const $ = cheerio.load(sourceData);
-
-      const imageLinks = [];
-      // TODO: abstract to func with polimorphism
-      $('img').each(function handler() {
-        const attrToChange = $(this).attr('src');
-        // TODO: add new URL constr to identify host name (e.g. script has the the same host)
-        if (!attrToChange.startsWith('http')) {
-          const externalLink = composeLink(URLObject, attrToChange);
-          const localLink = composeLocalLink(URLObject, attrToChange);
-          $(this).attr('src', localLink);
-          imageLinks.push({ externalLink, localLink });
-        }
-      });
-      resultedData = $.root().html();
-      const promises = imageLinks.map(({ externalLink, localLink }) => axios({
+      const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
+      resultedData = modifiedCheerioModel.root().html();
+      const promises = resourcesLinks.map(({ externalLink, localLink, type }) => axios({
         method: 'get',
         url: externalLink,
-        responseType: 'stream',
+        responseType: type === 'img' ? 'stream' : 'text',
       })
         .then((response) => ({ result: 'success', data: response.data, localLink }))
         .catch((e) => ({ result: 'error', error: e })));

@@ -4,8 +4,6 @@ import { createReadStream } from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nock from 'nock';
-import { get } from 'http';
-import exp from 'constants';
 import pageLoader from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -77,10 +75,11 @@ describe('checks files existence and its content', () => {
   // TODO: add describe each for multiple arguments
   const url = 'https://ru.hexlet.io/courses';
   test('in default directory', async () => {
-    const expectedHtml = await readFixtureFile('ru-hexlet-io-courses.html');
+    const responseHtml = await readFixtureFile('ru-hexlet-io-courses.html');
+    const expectedHtml = await readFixtureFile('ru-hexlet-io-courses_changed.html');
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
-      .reply(200, expectedHtml);
+      .reply(200, responseHtml);
     const result = await pageLoader(url, tmpDirPath);
     const resultedHtml = await fs.readFile(result, 'utf-8');
 
@@ -129,7 +128,9 @@ describe('checks files existence and its content', () => {
       .get(/packs\/js\/runtime.js$/)
       .replyWithFile(200, getFixturePath('runtime.js'), {
         'Cotent-Type': 'text/javascript',
-      });
+      })
+      .get(/assets\/professions\/nodejs.png$/)
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
 
     const result = await pageLoader(url, tmpDirPath);
     const resultedHtml = await fs.readFile(result, 'utf-8');
