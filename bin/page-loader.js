@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env DEBUG=*,-follow-redirects node
 import { Command } from 'commander';
 import pageLoader from '../src/index.js';
 
@@ -12,6 +12,6 @@ program
   .option('-o, --output [dir]', 'output dir')
   .action((url, options) => {
     pageLoader(url, options.output)
-      .then((result) => console.log(result));
+      .then((result) => console.log(`Page was successfully downloaded into '${result}'`));
   })
   .parse(process.argv);

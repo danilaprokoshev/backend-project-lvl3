@@ -3,6 +3,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import prettier from 'prettier';
+import debug from 'debug';
+import 'axios-debug-log';
+
+const debugPageLoader = debug('page-loader');
 
 const isEmptyPathname = (pathname) => pathname === '/';
 // TODO: import from parser dir
@@ -73,6 +77,7 @@ export default (url, directoryPath = process.cwd()) => {
     responseType: 'text',
   })
     .then(({ data }) => {
+      debugPageLoader('raw html was successfully loaded');
       sourceData = data;
       return fs.mkdir(filesDirPath, { recursive: true });
     })
@@ -85,10 +90,15 @@ export default (url, directoryPath = process.cwd()) => {
         url: externalLink,
         responseType: type === 'img' ? 'stream' : 'text',
       })
-        .then((response) => ({ result: 'success', data: response.data, localLink }))
-        .catch((e) => ({ result: 'error', error: e })));
-      const promise = Promise.all(promises);
-      return promise;
+        .then((response) => {
+          debugPageLoader(`resource ${externalLink} was successfully loaded`);
+          return ({ result: 'success', data: response.data, localLink });
+        })
+        .catch((e) => {
+          debugPageLoader(`error while loading resource ${externalLink}: ${e}`);
+          return ({ result: 'error', error: e });
+        }));
+      return Promise.all(promises);
     })
     .then((contents) => {
       const successResponses = contents.filter(({ result }) => result === 'success');
@@ -98,5 +108,5 @@ export default (url, directoryPath = process.cwd()) => {
     })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
-    .catch((e) => console.log(e));
+    .catch((e) => debugPageLoader(`error while loading page from ${url}: ${e}`));
 };

@@ -4,7 +4,7 @@
   "description": "backend project",
   "main": "src/index.js",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "DEBUG=*,-follow-redirects node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "bin": {
     "page-loader": "bin/page-loader.js"
@@ -30,8 +30,10 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
+    "axios-debug-log": "^0.8.4",
     "cheerio": "^1.0.0-rc.10",
     "commander": "^9.1.0",
+    "debug": "^4.3.4",
     "prettier": "^2.6.2"
   }
 }
