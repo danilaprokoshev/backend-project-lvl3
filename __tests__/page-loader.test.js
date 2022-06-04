@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 import os from 'os';
 import fs from 'fs/promises';
 import { createReadStream } from 'fs';
@@ -79,6 +80,8 @@ describe('checks files existence and its content', () => {
     const expectedHtml = await readFixtureFile('ru-hexlet-io-courses_changed.html');
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
+      .reply(200, responseHtml)
+      .get(/courses$/)
       .reply(200, responseHtml);
     const result = await pageLoader(url, tmpDirPath);
     const resultedHtml = await fs.readFile(result, 'utf-8');
@@ -146,5 +149,82 @@ describe('checks files existence and its content', () => {
     expect(resultedCSS.trim()).toBe(expectedCSS.trim());
     expect(resultedRelatedHtml.trim()).toBe(expectedRelatedHtml.trim());
     expect(resultedJS.trim()).toBe(expectedJS.trim());
+  });
+});
+
+describe('library throw errors', () => {
+  const url = 'https://ru.hexlet.io/courses';
+  test('throw network error', async () => {
+    const scope = nock(/ru\.hexlet\.io/)
+      .get(/courses$/)
+      .replyWithError({
+        message: 'Network Error',
+        code: 404,
+      });
+    try {
+      await pageLoader(url, tmpDirPath);
+    } catch (e) {
+      expect(e.message).toMatch('Network Error');
+      expect(e.code).toBe(404);
+    }
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(3);
+  });
+  test('network error (connection problem)', async () => {
+    const scope = nock(/ru\.hexlet\.io/)
+      .get(/courses$/)
+      .replyWithError({
+        syscall: 'getaddrinfo',
+        code: 'ENOTFOUND',
+      });
+    try {
+      await pageLoader(url, tmpDirPath);
+    } catch (e) {
+      expect(e.syscall).toMatch('getaddrinfo');
+      expect(e.code).toMatch('ENOTFOUND');
+    }
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(3);
+  });
+  test('more network error (loading resources)', async () => {
+    const htmlToResponse = await readFixtureFile('mocked-links-scripts-ru-hexlet-io-courses.html');
+    const scope = nock(/ru\.hexlet\.io/)
+      .get(/courses$/)
+      .reply(200, htmlToResponse)
+      .get(/assets\/professions\/nodejs.png$/)
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
+      .get(/packs\/js\/runtime.js$/)
+      .replyWithFile(200, getFixturePath('runtime.js'), {
+        'Cotent-Type': 'text/javascript',
+      })
+      .get(/courses$/)
+      .reply(200, htmlToResponse)
+      .get(/assets\/application.css$/)
+      .replyWithError({
+        message: 'Unathorized',
+        code: 401,
+      });
+    try {
+      await pageLoader(url, tmpDirPath);
+    } catch (e) {
+      expect(e.message).toMatch('Unathorized');
+      expect(e.code).toBe(401);
+    }
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(3);
+  });
+  test('throw file system error', async () => {
+    const htmlToResponse = await readFixtureFile('mocked-ru-hexlet-io-courses.html');
+    const scope = nock(/ru\.hexlet\.io/)
+      .get(/courses$/)
+      .reply(200, htmlToResponse);
+    const pathWithDeniedPermission = '/private/var/ma';
+    try {
+      await pageLoader(url, pathWithDeniedPermission);
+    } catch (e) {
+      expect(e.code).toMatch('EACCES');
+    }
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(2);
   });
 });

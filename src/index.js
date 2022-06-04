@@ -95,8 +95,8 @@ export default (url, directoryPath = process.cwd()) => {
           return ({ result: 'success', data: response.data, localLink });
         })
         .catch((e) => {
-          debugPageLoader(`error while loading resource ${externalLink}: ${e}`);
-          return ({ result: 'error', error: e });
+          debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
+          throw e;
         }));
       return Promise.all(promises);
     })
@@ -108,5 +108,7 @@ export default (url, directoryPath = process.cwd()) => {
     })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
-    .catch((e) => debugPageLoader(`error while loading page from ${url}: ${e}`));
+    .catch((error) => {
+      throw error;
+    });
 };
