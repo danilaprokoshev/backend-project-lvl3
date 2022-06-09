@@ -78,6 +78,7 @@ export default (url, directoryPath = process.cwd()) => {
   return fs.access(directoryPath).then(() => axios({
     method: 'get',
     url,
+    maxRedirects: 0,
     responseType: 'text',
   }))
     .then(({ data }) => {
@@ -122,6 +123,6 @@ export default (url, directoryPath = process.cwd()) => {
       console.error('!', error);
       console.log('url', url);
       console.log('path', directoryPath);
-      throw error.message;
+      throw error;
     });
 };
