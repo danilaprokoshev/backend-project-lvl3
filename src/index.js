@@ -123,6 +123,6 @@ export default (url, directoryPath = process.cwd()) => {
       console.error('!', error);
       console.log('url', url);
       console.log('path', directoryPath);
-      Promise.reject(new Error(error.message));
+      return Promise.reject(new Error(error.message));
     });
 };
