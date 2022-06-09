@@ -81,7 +81,7 @@ export default (url, directoryPath = process.cwd()) => {
     .then(({ data }) => {
       debugPageLoader('raw html was successfully loaded');
       sourceData = data;
-      return fs.mkdir(filesDirPath, { recursive: true });
+      return fs.mkdir(filesDirPath);
     })
     .then(() => {
       const $ = cheerio.load(sourceData, {
