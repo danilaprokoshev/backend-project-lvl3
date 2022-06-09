@@ -120,7 +120,7 @@ export default (url, directoryPath = process.cwd()) => {
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
     .catch((error) => {
-      console.error('!', error);
+      // console.error('!', error);
       console.log('url', url);
       console.log('path', directoryPath);
       return Promise.reject(new Error(error.message));
