@@ -122,6 +122,6 @@ export default (url, directoryPath = process.cwd()) => {
       console.error('!', error);
       console.log('url', url);
       console.log('path', directoryPath);
-      throw error;
+      throw error.message;
     });
 };
