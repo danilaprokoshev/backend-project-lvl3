@@ -56,11 +56,9 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
 };
 
 export default (url, directoryPath = process.cwd()) => {
-  console.log('begining exucting: url', url);
-  console.log('begining exucting: path', directoryPath);
-  if (!url) {
-    return Promise.resolve('the url must not be an empty');
-  }
+  // if (!url) {
+  //   return Promise.resolve('the url must not be an empty');
+  // }
   let sourceData;
   let resultedData;
   const resourcesData = [];
@@ -119,10 +117,5 @@ export default (url, directoryPath = process.cwd()) => {
     })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
-    .catch((error) => {
-      // console.error('!', error);
-      console.log('url', url);
-      console.log('path', directoryPath);
-      return Promise.reject(new Error(error.message));
-    });
+    .catch((error) => Promise.reject(new Error(error.message)));
 };
