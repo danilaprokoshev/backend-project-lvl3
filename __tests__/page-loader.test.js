@@ -60,16 +60,16 @@ describe('specified urls cases', () => {
     expect(result).toBe('the url must not be an empty');
   });
 
-  test.skip('given incorrect url', async () => {
-    const scope = nock(/ru\.hexlet\.io/)
-      .get(/courses$/)
-      .reply(400, 'Bad Request');
-    const url = 'htt://ru.hexlet.io/courses';
-    const result = await pageLoader(url);
+  //   test.skip('given incorrect url', async () => {
+  //     const scope = nock(/ru\.hexlet\.io/)
+  //       .get(/courses$/)
+  //       .reply(400, 'Bad Request');
+  //     const url = 'htt://ru.hexlet.io/courses';
+  //     const result = await pageLoader(url);
 
-    expect(scope.isDone()).toBe(false);
-    expect(result).toBe('the url is incorrect');
-  });
+//     expect(scope.isDone()).toBe(false);
+//     expect(result).toBe('the url is incorrect');
+//   });
 });
 
 describe('checks files existence and its content', () => {

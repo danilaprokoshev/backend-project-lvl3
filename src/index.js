@@ -92,7 +92,7 @@ export default (url, directoryPath = process.cwd()) => {
         task: () => axios({
           method: 'get',
           url: externalLink,
-          responseType: type === 'img' ? 'stream' : 'text',
+          responseType: type === 'img' ? 'stream' : 'text/css',
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
           // const responseData = type !== 'img' ? response.data.trim() : response.data;
