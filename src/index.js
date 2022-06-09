@@ -5,6 +5,7 @@ import * as cheerio from 'cheerio';
 import prettier from 'prettier';
 import debug from 'debug';
 import 'axios-debug-log';
+import Listr from 'listr';
 
 const debugPageLoader = debug('page-loader');
 
@@ -60,6 +61,7 @@ export default (url, directoryPath = process.cwd()) => {
   }
   let sourceData;
   let resultedData;
+  const resourcesData = [];
   const URLObject = new URL(url);
   // TODO: add checking URL
   const { host, pathname } = URLObject;
@@ -85,23 +87,26 @@ export default (url, directoryPath = process.cwd()) => {
       const $ = cheerio.load(sourceData);
       const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
       resultedData = modifiedCheerioModel.root().html();
-      const promises = resourcesLinks.map(({ externalLink, localLink, type }) => axios({
-        method: 'get',
-        url: externalLink,
-        responseType: type === 'img' ? 'stream' : 'text',
-      })
-        .then((response) => {
+      const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
+        title: externalLink,
+        task: () => axios({
+          method: 'get',
+          url: externalLink,
+          responseType: type === 'img' ? 'stream' : 'text',
+        }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
-          return ({ result: 'success', data: response.data, localLink });
+          resourcesData.push({ result: 'success', data: response.data, localLink });
         })
-        .catch((e) => {
-          debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
-          throw e;
-        }));
-      return Promise.all(promises);
+          .catch((e) => {
+            debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
+            throw e;
+          }),
+      }));
+      const tasks = new Listr(tasksArray, { concurrent: true });
+      return tasks.run();
     })
-    .then((contents) => {
-      const successResponses = contents.filter(({ result }) => result === 'success');
+    .then(() => {
+      const successResponses = resourcesData.filter(({ result }) => result === 'success');
       const promises = successResponses
         .map(({ localLink, data }) => fs.writeFile(path.join(directoryPath, localLink), data));
       return Promise.all(promises);

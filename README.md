@@ -9,3 +9,4 @@
 **[Asciinema on step #3](https://asciinema.org/a/NYhGwXsBVxp7KnMgiQ32Jt5UV)**
 **[Asciinema on step #4](https://asciinema.org/a/WBiaehvIniBCUrwSC6rdoeNg1)**
 **[Asciinema on step #5](https://asciinema.org/a/alrGVMdLO4Fg6nQ6Atf7xnWK9)**
+**[Asciinema on step #6](https://asciinema.org/a/BmZ2kLuDv3vIuh4QLGoHW92QN)**
