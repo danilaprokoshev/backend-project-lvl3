@@ -77,6 +77,7 @@ export default (url, directoryPath = process.cwd()) => {
     method: 'get',
     url,
     maxRedirects: 0,
+    timeout: 3000,
     responseType: 'text',
   }))
     .then(({ data }) => {
