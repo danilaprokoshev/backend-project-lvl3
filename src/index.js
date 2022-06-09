@@ -75,11 +75,11 @@ export default (url, directoryPath = process.cwd()) => {
   const pagePath = path.join(directoryPath, `${filename}${ext}`);
   const filesDirPath = path.join(directoryPath, `${filename}${filesDirName}`);
 
-  return axios({
+  return fs.access(directoryPath).then(() => axios({
     method: 'get',
     url,
     responseType: 'text',
-  })
+  }))
     .then(({ data }) => {
       debugPageLoader('raw html was successfully loaded');
       sourceData = data;
