@@ -117,6 +117,8 @@ export default (url, directoryPath = process.cwd()) => {
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
     .catch((error) => {
+      console.log('!', error);
+      console.error('!', error);
       throw error;
     });
 };
