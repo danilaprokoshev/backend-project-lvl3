@@ -95,8 +95,8 @@ export default (url, directoryPath = process.cwd()) => {
           responseType: type === 'img' ? 'stream' : 'text',
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
-          const responseData = type !== 'img' ? response.data.trim() : response.data;
-          resourcesData.push({ result: 'success', data: responseData, localLink });
+          // const responseData = type !== 'img' ? response.data.trim() : response.data;
+          resourcesData.push({ result: 'success', data: response.data, localLink });
         })
           .catch((e) => {
             debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
@@ -112,7 +112,7 @@ export default (url, directoryPath = process.cwd()) => {
         .map(({ localLink, data }) => fs.writeFile(path.join(directoryPath, localLink), data));
       return Promise.all(promises);
     })
-    .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
+    .then(() => fs.writeFile(pagePath, resultedData))
     .then(() => pagePath)
     .catch((error) => {
       throw error;
