@@ -84,7 +84,10 @@ export default (url, directoryPath = process.cwd()) => {
       return fs.mkdir(filesDirPath, { recursive: true });
     })
     .then(() => {
-      const $ = cheerio.load(sourceData);
+      const $ = cheerio.load(sourceData, {
+        normalizeWhitespace: true,
+        decodeEntities: false,
+      });
       const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
       resultedData = modifiedCheerioModel.root().html();
       const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
@@ -95,7 +98,6 @@ export default (url, directoryPath = process.cwd()) => {
           responseType: type === 'img' ? 'stream' : 'text/css',
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
-          // const responseData = type !== 'img' ? response.data.trim() : response.data;
           resourcesData.push({ result: 'success', data: response.data, localLink });
         })
           .catch((e) => {
