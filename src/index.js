@@ -105,7 +105,7 @@ export default (url, directoryPath = process.cwd()) => {
           url: externalLink,
           maxRedirects: 0,
           timeout: 500,
-          responseType: type === 'img' ? 'stream' : 'arraybuffer',
+          responseType: type === 'img' ? 'stream' : 'text',
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
           console.log(`resource ${externalLink} was successfully loaded`, response);
