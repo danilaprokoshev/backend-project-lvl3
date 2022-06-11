@@ -138,6 +138,7 @@ describe('checks files existence and its content', () => {
     expect(resultedCSS.trim()).toBe(expectedCSS.trim());
     expect(resultedRelatedHtml.trim()).toBe(expectedRelatedHtml.trim());
     expect(resultedJS.trim()).toBe(expectedJS.trim());
+    await expect(fs.access(path.join(tmpDirPath, 'ru-hexlet-io-courses.html'))).rejects.toThrow(/ENOENT/);
   });
 });
 

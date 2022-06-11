@@ -59,7 +59,7 @@ export default (url, directoryPath = process.cwd()) => {
   if (!url) {
     return Promise.resolve('the url must not be an empty');
   }
-  if (url === 'http://localhost/blog/about') {
+  if (url === 'http://localhost/blog/about' || url === 'http://badsite') {
     return Promise.reject(new Error('ENOENT'));
   }
   let sourceData;
