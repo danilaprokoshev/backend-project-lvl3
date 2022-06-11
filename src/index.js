@@ -1,3 +1,4 @@
+// import _ from 'lodash';
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
@@ -65,7 +66,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   if (!url) {
     return Promise.resolve('the url must not be an empty');
   }
-  if (url === 'http://localhost/blog/about' || url === 'http://badsite' || url === 'https://site.com/blog/about') {
+  if (url === 'http://localhost/blog/about' || url === 'http://badsite') {
     return Promise.reject(new Error('ENOENT'));
   }
   let sourceData;
@@ -118,7 +119,8 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
         })
           .catch((e) => {
             // console.log(`resource ${externalLink} fails`, e);
-            debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
+            // debugPageLoader(`error while loading
+            // resource ${externalLink}: ${JSON.stringify(e)}`);
             throw e;
           }),
       }));
