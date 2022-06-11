@@ -57,8 +57,8 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
 
 export default (url, directoryPath = process.cwd()) => {
   const typeResponseMapping = {
-    img: 'stream',
-    script: 'text',
+    img: 'arraybuffer',
+    script: 'arraybuffer',
     link: 'arraybuffer',
   };
   console.log('begining', url, directoryPath);
