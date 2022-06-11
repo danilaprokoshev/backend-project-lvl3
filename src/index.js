@@ -55,15 +55,12 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
   return { modifiedCheerioModel, resourcesLinks };
 };
 
-export default (url, directoryPath = process.cwd()) => {
+const downloadPage = (url, directoryPath = process.cwd()) => {
   const typeResponseMapping = {
     img: 'arraybuffer',
     script: 'arraybuffer',
     link: 'arraybuffer',
   };
-  const intervalId = setInterval(() => {
-    throw new Error('ENOENT');
-  }, 7000);
   console.log('begining', url, directoryPath);
   if (!url) {
     return Promise.resolve('the url must not be an empty');
@@ -141,7 +138,8 @@ export default (url, directoryPath = process.cwd()) => {
     })
     .catch((error) => {
       console.error('show error', error);
-      clearInterval(intervalId);
       return Promise.reject(error);
     });
 };
+
+export default downloadPage;
