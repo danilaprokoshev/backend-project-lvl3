@@ -114,7 +114,8 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
           console.log(`resource ${externalLink} was successfully loaded`, response);
-          resourcesData.push({ result: 'success', data: response.data, localLink });
+          // resourcesData.push({ result: 'success', data: response.data, localLink });
+          return fs.writeFile(path.join(directoryPath, localLink), response.data);
         })
           .catch((e) => {
             console.log(`resource ${externalLink} fails`, e);
@@ -125,12 +126,12 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       const tasks = new Listr(tasksArray, { concurrent: true });
       return tasks.run();
     })
-    .then(() => {
-      const successResponses = resourcesData.filter(({ result }) => result === 'success');
-      const promises = successResponses
-        .map(({ localLink, data }) => fs.writeFile(path.join(directoryPath, localLink), data));
-      return Promise.all(promises);
-    })
+    // .then(() => {
+    //   const successResponses = resourcesData.filter(({ result }) => result === 'success');
+    //   const promises = successResponses
+    //     .map(({ localLink, data }) => fs.writeFile(path.join(directoryPath, localLink), data));
+    //   return Promise.all(promises);
+    // })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
     .catch((error) => {
