@@ -106,9 +106,11 @@ export default (url, directoryPath = process.cwd()) => {
           responseType: type === 'img' ? 'stream' : 'arraybuffer',
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
+          console.log(`resource ${externalLink} was successfully loaded`, response);
           resourcesData.push({ result: 'success', data: response.data, localLink });
         })
           .catch((e) => {
+            console.log(`resource ${externalLink} fails`, e);
             debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
             throw e;
           }),
