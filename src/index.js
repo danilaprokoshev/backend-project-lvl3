@@ -56,6 +56,7 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
 };
 
 export default (url, directoryPath = process.cwd()) => {
+  console.log('begining', url, directoryPath);
   if (!url) {
     return Promise.resolve('the url must not be an empty');
   }
@@ -121,5 +122,8 @@ export default (url, directoryPath = process.cwd()) => {
     })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
-    .catch((error) => Promise.reject(error));
+    .catch((error) => {
+      console.log('show error', error);
+      Promise.reject(error);
+    });
 };
