@@ -65,7 +65,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   if (!url) {
     return Promise.resolve('the url must not be an empty');
   }
-  if (url === 'http://localhost/blog/about' || url === 'http://badsite') {
+  if (url === 'http://localhost/blog/about' || url === 'http://badsite' || url === 'https://site.com/blog/about') {
     return Promise.reject(new Error('ENOENT'));
   }
   let sourceData;
