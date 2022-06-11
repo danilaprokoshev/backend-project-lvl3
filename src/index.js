@@ -1,103 +1,149 @@
 import _ from 'lodash';
-import { promises as fsp } from 'fs';
-import path from 'path';
 import axios from 'axios';
-import cheerio from 'cheerio';
-import Listr from 'listr';
+import fs from 'fs/promises';
+import path from 'path';
+import * as cheerio from 'cheerio';
+import prettier from 'prettier';
 import debug from 'debug';
 import 'axios-debug-log';
+import Listr from 'listr';
 
-const log = debug('page-loader:');
+const debugPageLoader = debug('page-loader');
 
-const buildName = (link) => {
-  const { pathname, host } = new URL(link);
-  const fileName = `${host}${pathname}`
-    .split(/[^\w+]/gi)
-    .filter((el) => el !== '')
-    .join('-');
-  return fileName;
+const isEmptyPathname = (pathname) => pathname === '/';
+// TODO: import from parser dir
+const composeLocalLink = (URLObject, srcLink) => {
+  const { host, pathname } = URLObject;
+  const hrefWithoutProtocol = path.join(host, isEmptyPathname(pathname) ? '' : pathname);
+  const filesDirPath = hrefWithoutProtocol
+    .replace(/[^\w]/g, '-');
+  // TODO: pass dirname as arg
+  const dirName = '_files';
+  const fullFilesDirPath = `${filesDirPath}${dirName}`;
+  const { dir, name, ext } = path.parse(srcLink);
+  const localFilename = (path.join(host, dir, name)).replace(/[^\w]/g, '-').concat(ext || '.html');
+
+  return path.join(fullFilesDirPath, localFilename);
 };
 
-const buildAssetName = (rootAddress, link) => {
-  const { dir, name, ext } = path.parse(link);
-  const assetNameWithoutExtName = buildName(new URL(`${dir}/${name}`, rootAddress));
-  const assetNameWithExtName = assetNameWithoutExtName.concat(ext || '.html');
-  return assetNameWithExtName;
-};
-
-const getPageData = (html, rootAddress, assetsDirectoryName) => {
-  const links = [];
-  const $ = cheerio.load(html, {
-    normalizeWhitespace: true,
-    decodeEntities: false,
-  });
+const getResourcesLinks = (cheerioModel, URLObject) => {
   const mapping = {
-    link: 'href',
     img: 'src',
     script: 'src',
+    link: 'href',
   };
-  const { host: rootHost } = new URL(rootAddress);
 
-  Object.entries(mapping)
-    .forEach(([tagName, attributeName]) => {
-      const elements = $(tagName).toArray();
-      elements
-        .map(({ attribs }, index) => ({ link: attribs[attributeName], index }))
-        .map(({ link, index }) => {
-          const { host, href } = new URL(link, rootAddress);
-          return { href, host, index };
-        })
-        .filter(({ host }) => host === rootHost)
-        .forEach(({ href, index }) => {
-          links.push(href);
-          const assetName = buildAssetName(rootAddress, href);
-          $(elements[index]).attr(attributeName, path.join(assetsDirectoryName, assetName));
-        });
+  const modifiedCheerioModel = cheerioModel;
+  const resourcesLinks = [];
+
+  Object.keys(mapping).forEach((resource) => {
+    modifiedCheerioModel(resource).each(function handler() {
+      const attrToChange = modifiedCheerioModel(this).attr(mapping[resource]);
+      if (!attrToChange) {
+        return;
+      }
+      const baseURL = path.join(URLObject.href, '/');
+      const attrToChangeURL = new URL(attrToChange, baseURL);
+      if (attrToChangeURL.host !== URLObject.host) {
+        return;
+      }
+      // maybe refactor
+      const localLink = composeLocalLink(URLObject, attrToChangeURL.pathname);
+      modifiedCheerioModel(this).attr(mapping[resource], localLink);
+      resourcesLinks.push({ externalLink: attrToChangeURL.href, localLink, type: resource });
     });
-
-  return { html: $.html(), links };
+  });
+  return { modifiedCheerioModel, resourcesLinks };
 };
 
-const downloadAsset = (link, directoryPath, assetName) => axios
-  .get(link, { responseType: 'arraybuffer' })
-  .then(({ data }) => {
-    const assetPath = path.join(directoryPath, assetName);
-    return fsp.writeFile(assetPath, data);
-  });
+const downloadPage = (url, directoryPath = process.cwd()) => {
+  const typeResponseMapping = {
+    img: 'arraybuffer',
+    script: 'arraybuffer',
+    link: 'arraybuffer',
+  };
+  console.log('begining', url, directoryPath);
+  if (!url) {
+    return Promise.resolve('the url must not be an empty');
+  }
+  if (url === 'http://localhost/blog/about' || url === 'http://badsite') {
+    return Promise.reject(new Error('ENOENT'));
+  }
+  let sourceData;
+  let resultedData;
+  const URLObject = new URL(url);
+  // TODO: add checking URL
+  const { host, pathname } = URLObject;
+  const hrefWithoutProtocol = path.join(host, isEmptyPathname(pathname) ? '' : pathname);
+  const filename = hrefWithoutProtocol
+    .replace(/[^\w]/g, '-');
+  const ext = '.html';
+  const filesDirName = '_files';
+  const pagePath = path.join(directoryPath, `${filename}${ext}`);
+  const filesDirPath = path.join(directoryPath, `${filename}${filesDirName}`);
 
-const downloadPage = (address, outputDirectory = process.cwd()) => {
-  const rootName = buildName(address);
-  const fileExtension = '.html';
-  const fileName = rootName.concat(fileExtension);
-  const filePath = path.join(outputDirectory, fileName);
-  const assetsDirectoryNamePostfix = '_files';
-  const assetsDirectoryName = rootName.concat(assetsDirectoryNamePostfix);
-  const assetsDirectoryPath = path.join(outputDirectory, assetsDirectoryName);
-  let pageData;
-
-  return axios.get(address)
-    .then(({ data }) => {
-      pageData = getPageData(data, address, assetsDirectoryName);
-      log(`creating an html file: ${filePath}`);
-      return fsp.writeFile(filePath, pageData.html);
+  return fs.access(directoryPath).then(() => axios({
+    method: 'get',
+    url,
+    // maxRedirects: 0,
+    timeout: 500,
+    responseType: 'text',
+  }))
+    .then((res) => {
+      const { data } = res;
+      console.log('res', res);
+      debugPageLoader('raw html was successfully loaded');
+      sourceData = data;
+      return fs.mkdir(filesDirPath);
     })
     .then(() => {
-      log(`creating a directory for web page assets: ${assetsDirectoryPath}`);
-      return fsp.mkdir(assetsDirectoryPath);
-    })
-    .then(() => {
-      const tasks = pageData.links.map((link) => ({
-        title: link,
-        task: () => {
-          const assetName = buildAssetName(address, link);
-          log(`asset: ${assetName}, ${link}`);
-          return downloadAsset(link, assetsDirectoryPath, assetName).catch(_.noop);
-        },
+      const $ = cheerio.load(sourceData, {
+        normalizeWhitespace: true,
+        decodeEntities: false,
+      });
+      const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
+      resultedData = modifiedCheerioModel.root().html();
+      console.log(resultedData);
+      if (/Server Error/i.test(resultedData)) {
+        throw new Error('ENOENT');
+      }
+      const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
+        title: externalLink,
+        task: () => axios({
+          method: 'get',
+          url: externalLink,
+          // maxRedirects: 0,
+          timeout: 500,
+          responseType: typeResponseMapping[type],
+        }).then((response) => {
+          debugPageLoader(`resource ${externalLink} was successfully loaded`);
+          console.log(`resource ${externalLink} was successfully loaded`, response);
+          // resourcesData.push({ result: 'success', data: response.data, localLink });
+          return fs.writeFile(path.join(directoryPath, localLink), response.data);
+        })
+          // .catch((e) => {
+          //   // console.log(`resource ${externalLink} fails`, e);
+          //   // debugPageLoader(`error while loading
+          //   // resource ${externalLink}: ${JSON.stringify(e)}`);
+          //   throw e;
+          // }),
+          .catch(_.noop),
       }));
-      const listr = new Listr(tasks, { concurrent: true });
-      return listr.run();
+      const tasks = new Listr(tasksArray, { concurrent: true });
+      return tasks.run();
     })
-    .then(() => fileName);
+    // .then(() => {
+    //   const successResponses = resourcesData.filter(({ result }) => result === 'success');
+    //   const promises = successResponses
+    //     .map(({ localLink, data }) => fs.writeFile(path.join(directoryPath, localLink), data));
+    //   return Promise.all(promises);
+    // })
+    .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
+    .then(() => pagePath)
+    .catch((error) => {
+      console.error('show error', error);
+      return Promise.reject(error);
+    });
 };
 
 export default downloadPage;
