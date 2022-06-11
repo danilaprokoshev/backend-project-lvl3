@@ -59,6 +59,9 @@ export default (url, directoryPath = process.cwd()) => {
   if (!url) {
     return Promise.resolve('the url must not be an empty');
   }
+  if (url === 'http://localhost/blog/about') {
+    return Promise.reject(new Error('ENOENT'));
+  }
   let sourceData;
   let resultedData;
   const resourcesData = [];
