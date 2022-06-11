@@ -123,7 +123,7 @@ export default (url, directoryPath = process.cwd()) => {
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
     .catch((error) => {
-      console.log('show error', error);
+      console.error('show error', error);
       Promise.reject(error);
     });
 };
