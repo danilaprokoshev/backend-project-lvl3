@@ -1,4 +1,4 @@
-// import _ from 'lodash';
+import _ from 'lodash';
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
@@ -117,12 +117,13 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
           // resourcesData.push({ result: 'success', data: response.data, localLink });
           return fs.writeFile(path.join(directoryPath, localLink), response.data);
         })
-          .catch((e) => {
-            // console.log(`resource ${externalLink} fails`, e);
-            // debugPageLoader(`error while loading
-            // resource ${externalLink}: ${JSON.stringify(e)}`);
-            throw e;
-          }),
+          // .catch((e) => {
+          //   // console.log(`resource ${externalLink} fails`, e);
+          //   // debugPageLoader(`error while loading
+          //   // resource ${externalLink}: ${JSON.stringify(e)}`);
+          //   throw e;
+          // }),
+          .catch(_.noop),
       }));
       const tasks = new Listr(tasksArray, { concurrent: true });
       return tasks.run();
