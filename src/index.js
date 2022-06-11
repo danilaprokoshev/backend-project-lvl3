@@ -124,6 +124,6 @@ export default (url, directoryPath = process.cwd()) => {
     .then(() => pagePath)
     .catch((error) => {
       console.error('show error', error);
-      Promise.reject(error);
+      return Promise.reject(error);
     });
 };
