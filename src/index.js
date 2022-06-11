@@ -61,6 +61,9 @@ export default (url, directoryPath = process.cwd()) => {
     script: 'arraybuffer',
     link: 'arraybuffer',
   };
+  const intervalId = setInterval(() => {
+    throw new Error('ENOENT');
+  }, 7000);
   console.log('begining', url, directoryPath);
   if (!url) {
     return Promise.resolve('the url must not be an empty');
@@ -132,9 +135,13 @@ export default (url, directoryPath = process.cwd()) => {
       return Promise.all(promises);
     })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
-    .then(() => pagePath)
+    .then(() => {
+      clearInterval(intervalId);
+      return pagePath;
+    })
     .catch((error) => {
       console.error('show error', error);
+      clearInterval(intervalId);
       return Promise.reject(error);
     });
 };
