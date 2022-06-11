@@ -70,7 +70,6 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   }
   let sourceData;
   let resultedData;
-  const resourcesData = [];
   const URLObject = new URL(url);
   // TODO: add checking URL
   const { host, pathname } = URLObject;
@@ -118,7 +117,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
           return fs.writeFile(path.join(directoryPath, localLink), response.data);
         })
           .catch((e) => {
-            console.log(`resource ${externalLink} fails`, e);
+            // console.log(`resource ${externalLink} fails`, e);
             debugPageLoader(`error while loading resource ${externalLink}: ${JSON.stringify(e)}`);
             throw e;
           }),
