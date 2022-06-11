@@ -132,10 +132,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       return Promise.all(promises);
     })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
-    .then(() => {
-      clearInterval(intervalId);
-      return pagePath;
-    })
+    .then(() => pagePath)
     .catch((error) => {
       console.error('show error', error);
       return Promise.reject(error);
