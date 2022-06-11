@@ -84,7 +84,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   return fs.access(directoryPath).then(() => axios({
     method: 'get',
     url,
-    maxRedirects: 0,
+    // maxRedirects: 0,
     timeout: 500,
     responseType: 'text',
   }))
@@ -107,7 +107,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
         task: () => axios({
           method: 'get',
           url: externalLink,
-          maxRedirects: 0,
+          // maxRedirects: 0,
           timeout: 500,
           responseType: typeResponseMapping[type],
         }).then((response) => {
