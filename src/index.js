@@ -56,6 +56,11 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
 };
 
 export default (url, directoryPath = process.cwd()) => {
+  const typeResponseMapping = {
+    img: 'stream',
+    script: 'text',
+    link: 'arraybuffer',
+  };
   console.log('begining', url, directoryPath);
   if (!url) {
     return Promise.resolve('the url must not be an empty');
@@ -105,7 +110,7 @@ export default (url, directoryPath = process.cwd()) => {
           url: externalLink,
           maxRedirects: 0,
           timeout: 500,
-          responseType: type === 'img' ? 'stream' : 'text',
+          responseType: typeResponseMapping[type],
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
           console.log(`resource ${externalLink} was successfully loaded`, response);
