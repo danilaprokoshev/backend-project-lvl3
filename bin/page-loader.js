@@ -19,7 +19,10 @@ program
   .option('-o, --output [dir]', 'output dir')
   .action((url, options) => {
     pageLoader(url, options.output)
-      .then((result) => console.log(`Page was successfully downloaded into '${result}'`))
+      .then((result) => {
+        console.log(`Page was successfully downloaded into '${result}'`);
+        process.exit();
+      })
       .catch((error) => {
         console.error('[ERR]', configureErrorOutput(error), '\n', error);
         process.exit(1);
