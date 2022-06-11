@@ -84,7 +84,9 @@ export default (url, directoryPath = process.cwd()) => {
     timeout: 500,
     responseType: 'text',
   }))
-    .then(({ data }) => {
+    .then((res) => {
+      const { data } = res;
+      console.log('res', res);
       debugPageLoader('raw html was successfully loaded');
       sourceData = data;
       return fs.mkdir(filesDirPath);
