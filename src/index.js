@@ -103,6 +103,8 @@ export default (url, directoryPath = process.cwd()) => {
         task: () => axios({
           method: 'get',
           url: externalLink,
+          maxRedirects: 0,
+          timeout: 500,
           responseType: type === 'img' ? 'stream' : 'arraybuffer',
         }).then((response) => {
           debugPageLoader(`resource ${externalLink} was successfully loaded`);
