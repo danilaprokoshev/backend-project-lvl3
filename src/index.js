@@ -59,7 +59,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   const typeResponseMapping = {
     img: 'arraybuffer',
     script: 'arraybuffer',
-    link: 'text',
+    link: 'arraybuffer',
   };
   console.log('begining', url, directoryPath);
   if (!url) {
