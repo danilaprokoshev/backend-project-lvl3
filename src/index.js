@@ -104,7 +104,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       resultedData = modifiedCheerioModel.root().html();
       console.log(resultedData);
       if (/Server Error/i.test(resultedData)) {
-        Promise.reject(new Error('ENOENT'));
+        return Promise.reject(new Error('ENOENT'));
       }
       // const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
       //   title: externalLink,
@@ -145,7 +145,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
           console.log(`resource ${externalLink} fails`, e);
           debugPageLoader(`error while loading
           resource ${externalLink}: ${JSON.stringify(e)}`);
-          throw e;
+          return Promise.reject(e);
         }));
       return Promise.all(promises);
     })
