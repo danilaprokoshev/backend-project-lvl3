@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
@@ -6,7 +5,7 @@ import * as cheerio from 'cheerio';
 import prettier from 'prettier';
 import debug from 'debug';
 import 'axios-debug-log';
-import Listr from 'listr';
+// import Listr from 'listr';
 
 const debugPageLoader = debug('page-loader');
 
@@ -107,30 +106,48 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       if (/Server Error/i.test(resultedData)) {
         Promise.reject(new Error('ENOENT'));
       }
-      const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
-        title: externalLink,
-        task: () => axios({
-          method: 'get',
-          url: externalLink,
-          // maxRedirects: 0,
-          timeout: 500,
-          responseType: typeResponseMapping[type],
-        }).then((response) => {
-          debugPageLoader(`resource ${externalLink} was successfully loaded`);
-          console.log(`resource ${externalLink} was successfully loaded`, response);
-          // resourcesData.push({ result: 'success', data: response.data, localLink });
-          return fs.writeFile(path.join(directoryPath, localLink), response.data);
-        })
-          // .catch((e) => {
-          //   // console.log(`resource ${externalLink} fails`, e);
-          //   // debugPageLoader(`error while loading
-          //   // resource ${externalLink}: ${JSON.stringify(e)}`);
-          //   throw e;
-          // }),
-          .catch(_.noop),
-      }));
-      const tasks = new Listr(tasksArray, { concurrent: true });
-      return tasks.run();
+      // const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
+      //   title: externalLink,
+      //   task: () => axios({
+      //     method: 'get',
+      //     url: externalLink,
+      //     // maxRedirects: 0,
+      //     timeout: 500,
+      //     responseType: typeResponseMapping[type],
+      //   }).then((response) => {
+      //     debugPageLoader(`resource ${externalLink} was successfully loaded`);
+      //     console.log(`resource ${externalLink} was successfully loaded`, response);
+      //     // resourcesData.push({ result: 'success', data: response.data, localLink });
+      //     return fs.writeFile(path.join(directoryPath, localLink), response.data);
+      //   })
+      //     .catch((e) => {
+      //       console.log(`resource ${externalLink} fails`, e);
+      //       debugPageLoader(`error while loading
+      //       resource ${externalLink}: ${JSON.stringify(e)}`);
+      //       throw e;
+      //     }),
+      // }));
+      // const tasks = new Listr(tasksArray, { concurrent: true });
+      // return tasks.run();
+      const promises = resourcesLinks.map(({ externalLink, localLink, type }) => axios({
+        method: 'get',
+        url: externalLink,
+        // maxRedirects: 0,
+        timeout: 500,
+        responseType: typeResponseMapping[type],
+      }).then((response) => {
+        debugPageLoader(`resource ${externalLink} was successfully loaded`);
+        console.log(`resource ${externalLink} was successfully loaded`, response);
+        // resourcesData.push({ result: 'success', data: response.data, localLink });
+        return fs.writeFile(path.join(directoryPath, localLink), response.data);
+      })
+        .catch((e) => {
+          console.log(`resource ${externalLink} fails`, e);
+          debugPageLoader(`error while loading
+          resource ${externalLink}: ${JSON.stringify(e)}`);
+          throw e;
+        }));
+      return Promise.all(promises);
     })
     // .then(() => {
     //   const successResponses = resourcesData.filter(({ result }) => result === 'success');

@@ -175,7 +175,7 @@ describe('library throw errors', () => {
     expect(scope.isDone()).toBe(true);
     expect.assertions(3);
   });
-  test.skip('more network error (loading resources)', async () => {
+  test('more network error (loading resources)', async () => {
     const htmlToResponse = await readFixtureFile('mocked-links-scripts-ru-hexlet-io-courses.html');
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
