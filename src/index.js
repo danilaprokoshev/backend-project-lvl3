@@ -59,14 +59,11 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   const typeResponseMapping = {
     img: 'arraybuffer',
     script: 'arraybuffer',
-    link: 'arraybuffer',
+    link: 'text',
   };
   console.log('begining', url, directoryPath);
   if (!url) {
     return Promise.resolve('the url must not be an empty');
-  }
-  if (url === 'http://localhost/blog/about' || url === 'http://badsite') {
-    return Promise.reject(new Error('ENOENT'));
   }
   let sourceData;
   let resultedData;
@@ -84,7 +81,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   return fs.access(directoryPath).then(() => axios({
     method: 'get',
     url,
-    // maxRedirects: 0,
+    maxRedirects: 0,
     timeout: 500,
     responseType: 'text',
   }))
@@ -132,17 +129,14 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       const promises = resourcesLinks.map(({ externalLink, localLink, type }) => axios({
         method: 'get',
         url: externalLink,
-        // maxRedirects: 0,
+        maxRedirects: 0,
         timeout: 500,
         responseType: typeResponseMapping[type],
       }).then((response) => {
         debugPageLoader(`resource ${externalLink} was successfully loaded`);
-        console.log(`resource ${externalLink} was successfully loaded`, response);
-        // resourcesData.push({ result: 'success', data: response.data, localLink });
         return fs.writeFile(path.join(directoryPath, localLink), response.data);
       })
         .catch((e) => {
-          console.log(`resource ${externalLink} fails`, e);
           debugPageLoader(`error while loading
           resource ${externalLink}: ${JSON.stringify(e)}`);
           return Promise.reject(e);
