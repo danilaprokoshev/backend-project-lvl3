@@ -53,14 +53,6 @@ describe('return correct path', () => {
   });
 });
 
-// describe('specified urls cases', () => {
-//   test('given empty url', async () => {
-//     const result = await pageLoader('');
-
-//     expect(result).toBe('the url must not be an empty');
-//   });
-// });
-
 describe('checks files existence and its content', () => {
   // TODO: add describe each for multiple arguments
   const url = 'https://ru.hexlet.io/courses';

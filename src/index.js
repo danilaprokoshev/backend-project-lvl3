@@ -61,10 +61,6 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     script: 'arraybuffer',
     link: 'arraybuffer',
   };
-  // console.log('begining', url, directoryPath);
-  // if (!url) {
-  //   return Promise.resolve('the url must not be an empty');
-  // }
   let sourceData;
   let resultedData;
   const URLObject = new URL(url);
@@ -83,7 +79,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     url,
     maxRedirects: 0,
     timeout: 500,
-    responseType: 'text',
+    responseType: 'arraybuffer',
   })
     .then((res) => {
       const { data } = res;
