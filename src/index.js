@@ -61,7 +61,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     script: 'arraybuffer',
     link: 'arraybuffer',
   };
-  console.log('begining', url, directoryPath);
+  // console.log('begining', url, directoryPath);
   // if (!url) {
   //   return Promise.resolve('the url must not be an empty');
   // }
@@ -87,7 +87,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   })
     .then((res) => {
       const { data } = res;
-      console.log('res', res);
+      // console.log('res', res);
       debugPageLoader('raw html was successfully loaded');
       sourceData = data;
       return fs.mkdir(filesDirPath);
@@ -99,7 +99,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       });
       const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
       resultedData = modifiedCheerioModel.root().html();
-      console.log(resultedData);
+      // console.log(resultedData);
       if (/Server Error/i.test(resultedData)) {
         return Promise.reject(new Error('ENOENT'));
       }
@@ -151,8 +151,8 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     //   return Promise.all(promises);
     // })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
-    .then(() => pagePath)
-    .catch((error) => Promise.reject(error));
+    .then(() => pagePath);
+  // .catch((error) => Promise.reject(error));
 };
 
 export default downloadPage;
