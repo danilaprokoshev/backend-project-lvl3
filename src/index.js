@@ -135,12 +135,12 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       }).then((response) => {
         debugPageLoader(`resource ${externalLink} was successfully loaded`);
         return fs.writeFile(path.join(directoryPath, localLink), response.data);
-      })
-        .catch((e) => {
-          debugPageLoader(`error while loading
-          resource ${externalLink}: ${JSON.stringify(e)}`);
-          return Promise.reject(e);
-        }));
+      }));
+        // .catch((e) => {
+        //   debugPageLoader(`error while loading
+        //   resource ${externalLink}: ${JSON.stringify(e)}`);
+        //   return Promise.reject(e);
+        // }));
       return Promise.all(promises);
     })
     // .then(() => {
