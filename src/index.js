@@ -62,9 +62,9 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     link: 'arraybuffer',
   };
   console.log('begining', url, directoryPath);
-  if (!url) {
-    return Promise.resolve('the url must not be an empty');
-  }
+  // if (!url) {
+  //   return Promise.resolve('the url must not be an empty');
+  // }
   let sourceData;
   let resultedData;
   const URLObject = new URL(url);
@@ -78,13 +78,13 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   const pagePath = path.join(directoryPath, `${filename}${ext}`);
   const filesDirPath = path.join(directoryPath, `${filename}${filesDirName}`);
 
-  return fs.access(directoryPath).then(() => axios({
+  return axios({
     method: 'get',
     url,
     maxRedirects: 0,
     timeout: 500,
     responseType: 'text',
-  }))
+  })
     .then((res) => {
       const { data } = res;
       console.log('res', res);
@@ -135,13 +135,14 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       }).then((response) => {
         debugPageLoader(`resource ${externalLink} was successfully loaded`);
         return fs.writeFile(path.join(directoryPath, localLink), response.data);
-      }));
-        // .catch((e) => {
-        //   debugPageLoader(`error while loading
-        //   resource ${externalLink}: ${JSON.stringify(e)}`);
-        //   return Promise.reject(e);
-        // }));
-      return Promise.all(promises);
+      })
+        .catch((e) => {
+          debugPageLoader(`error while loading
+          resource ${externalLink}: ${JSON.stringify(e)}`);
+          return Promise.reject(e);
+        }));
+      const promise = Promise.all(promises);
+      return promise;
     })
     // .then(() => {
     //   const successResponses = resourcesData.filter(({ result }) => result === 'success');
