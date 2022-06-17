@@ -152,10 +152,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     // })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
     .then(() => pagePath)
-    .catch((error) => {
-      console.error('show error', error);
-      return Promise.reject(error);
-    });
+    .catch((error) => Promise.reject(error));
 };
 
 export default downloadPage;
