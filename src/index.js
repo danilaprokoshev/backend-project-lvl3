@@ -56,9 +56,7 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
 };
 
 const downloadPage = async (url, directoryPath = process.cwd()) => {
-  const id = setInterval(() => {
-    throw new Error('oops!');
-  }, 5000);
+  const id = setInterval(() => Promise.reject(new Error('oops!')), 5000);
   const typeResponseMapping = {
     img: 'arraybuffer',
     script: 'arraybuffer',
