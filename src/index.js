@@ -77,7 +77,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   return axios({
     method: 'get',
     url,
-    maxRedirects: 0,
+    // maxRedirects: 0,
     timeout: 500,
     responseType: 'arraybuffer',
   })
@@ -91,14 +91,13 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     .then(() => {
       const $ = cheerio.load(sourceData, {
         normalizeWhitespace: true,
-        decodeEntities: false,
+        // decodeEntities: false,
       });
       const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
       resultedData = modifiedCheerioModel.root().html();
-      console.log(resourcesLinks);
-      if (/Server Error/i.test(resultedData)) {
-        return Promise.reject(new Error('ENOENT'));
-      }
+      // if (/Server Error/i.test(resultedData)) {
+      //   return Promise.reject(new Error('ENOENT'));
+      // }
       // const tasksArray = resourcesLinks.map(({ externalLink, localLink, type }) => ({
       //   title: externalLink,
       //   task: () => axios({
@@ -125,13 +124,14 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       const promises = resourcesLinks.map(({ externalLink, localLink, type }) => axios({
         method: 'get',
         url: externalLink,
-        maxRedirects: 0,
+        // maxRedirects: 0,
         timeout: 500,
         responseType: typeResponseMapping[type],
       }).then((response) => {
         debugPageLoader(`resource ${externalLink} was successfully loaded`);
-        return fs.writeFile(path.join(directoryPath, localLink), response.data);
-      })
+        return response;
+        // return fs.writeFile(path.join(directoryPath, localLink), response.data);
+      }).then((response) => fs.writeFile(path.join(directoryPath, localLink), response.data))
         .catch((e) => {
           debugPageLoader(`error while loading
           resource ${externalLink}: ${JSON.stringify(e)}`);
