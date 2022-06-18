@@ -147,8 +147,8 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
     //   return Promise.all(promises);
     // })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
-    .then(() => pagePath);
-  // .catch((error) => Promise.reject(error));
+    .then(() => pagePath)
+    .catch((error) => Promise.reject(error));
 };
 
 export default downloadPage;
