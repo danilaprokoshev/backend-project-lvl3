@@ -55,7 +55,7 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
   return { modifiedCheerioModel, resourcesLinks };
 };
 
-const downloadPage = (url, directoryPath = process.cwd()) => {
+const downloadPage = async (url, directoryPath = process.cwd()) => {
   const typeResponseMapping = {
     img: 'arraybuffer',
     script: 'arraybuffer',
