@@ -95,7 +95,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       });
       const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
       resultedData = modifiedCheerioModel.root().html();
-      // console.log(resultedData);
+      console.log(resourcesLinks);
       if (/Server Error/i.test(resultedData)) {
         return Promise.reject(new Error('ENOENT'));
       }
