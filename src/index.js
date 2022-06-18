@@ -77,7 +77,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
   return axios({
     method: 'get',
     url,
-    // maxRedirects: 0,
+    maxRedirects: 1,
     timeout: 500,
     responseType: 'arraybuffer',
   })
@@ -124,7 +124,7 @@ const downloadPage = (url, directoryPath = process.cwd()) => {
       const promises = resourcesLinks.map(({ externalLink, localLink, type }) => axios({
         method: 'get',
         url: externalLink,
-        // maxRedirects: 0,
+        maxRedirects: 1,
         timeout: 500,
         responseType: typeResponseMapping[type],
       }).then((response) => {
