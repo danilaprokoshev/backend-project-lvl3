@@ -56,6 +56,9 @@ const getResourcesLinks = (cheerioModel, URLObject) => {
 };
 
 const downloadPage = async (url, directoryPath = process.cwd()) => {
+  const id = setInterval(() => {
+    throw new Error('oops!');
+  }, 5000);
   const typeResponseMapping = {
     img: 'arraybuffer',
     script: 'arraybuffer',
@@ -91,7 +94,7 @@ const downloadPage = async (url, directoryPath = process.cwd()) => {
     .then(() => {
       const $ = cheerio.load(sourceData, {
         normalizeWhitespace: true,
-        // decodeEntities: false,
+        decodeEntities: false,
       });
       const { modifiedCheerioModel, resourcesLinks } = getResourcesLinks($, URLObject);
       resultedData = modifiedCheerioModel.root().html();
@@ -147,8 +150,14 @@ const downloadPage = async (url, directoryPath = process.cwd()) => {
     //   return Promise.all(promises);
     // })
     .then(() => fs.writeFile(pagePath, prettier.format(resultedData, { parser: 'html' })))
-    .then(() => pagePath)
-    .catch((error) => Promise.reject(error));
+    .then(() => {
+      clearInterval(id);
+      return pagePath;
+    })
+    .catch((error) => {
+      clearInterval(id);
+      return Promise.reject(error);
+    });
 };
 
 export default downloadPage;
