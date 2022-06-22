@@ -138,34 +138,18 @@ describe('library throw errors', () => {
   test('throw network error', async () => {
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
-      .replyWithError({
-        message: 'Network Error',
-        code: 404,
-      });
-    try {
-      await pageLoader(url, tmpDirPath);
-    } catch (e) {
-      expect(e.message).toMatch('Network Error');
-      expect(e.code).toBe(404);
-    }
+      .replyWithError('Network Error');
+    await expect(pageLoader(url, tmpDirPath)).rejects.toThrow('Network Error');
     expect(scope.isDone()).toBe(true);
-    expect.assertions(3);
+    expect.assertions(2);
   });
   test('network error (connection problem)', async () => {
     const scope = nock(/ru\.hexlet\.io/)
       .get(/courses$/)
-      .replyWithError({
-        syscall: 'getaddrinfo',
-        code: 'ENOTFOUND',
-      });
-    try {
-      await pageLoader(url, tmpDirPath);
-    } catch (e) {
-      expect(e.syscall).toMatch('getaddrinfo');
-      expect(e.code).toMatch('ENOTFOUND');
-    }
+      .replyWithError('ENOTFOUND');
+    await expect(pageLoader(url, tmpDirPath)).rejects.toThrow('ENOTFOUND');
     expect(scope.isDone()).toBe(true);
-    expect.assertions(3);
+    expect.assertions(2);
   });
   test('more network error (loading resources)', async () => {
     const htmlToResponse = await readFixtureFile('mocked-links-scripts-ru-hexlet-io-courses.html');
@@ -181,18 +165,10 @@ describe('library throw errors', () => {
       .get(/courses$/)
       .reply(200, htmlToResponse)
       .get(/assets\/application.css$/)
-      .replyWithError({
-        message: 'Unathorized',
-        code: 401,
-      });
-    try {
-      await pageLoader(url, tmpDirPath);
-    } catch (e) {
-      expect(e.message).toMatch('Unathorized');
-      expect(e.code).toBe(401);
-    }
+      .replyWithError('Unathorized');
+    await expect(pageLoader(url, tmpDirPath)).rejects.toThrow('Unathorized');
     expect(scope.isDone()).toBe(true);
-    expect.assertions(3);
+    expect.assertions(2);
   });
   test('throw file system error', async () => {
     const htmlToResponse = await readFixtureFile('mocked-ru-hexlet-io-courses.html');
@@ -200,11 +176,8 @@ describe('library throw errors', () => {
       .get(/courses$/)
       .reply(200, htmlToResponse);
     const pathWithDeniedPermission = '/private/var/ma';
-    try {
-      await pageLoader(url, pathWithDeniedPermission);
-    } catch (e) {
-      expect(e.code).toMatch('EACCES');
-    }
+    await expect(pageLoader(url, pathWithDeniedPermission)).rejects.toThrow('EACCES');
+
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
   });
