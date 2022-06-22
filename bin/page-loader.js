@@ -1,4 +1,4 @@
-#!/usr/bin/env DEBUG=*,-follow-redirects node
+#!/usr/bin/env node
 import { Command } from 'commander';
 import pageLoader from '../src/index.js';
 
